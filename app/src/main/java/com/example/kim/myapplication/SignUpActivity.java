@@ -26,7 +26,7 @@ public class SignUpActivity extends ActionBarActivity implements View.OnClickLis
     private ActionBarDrawerToggle drawerToggle;
     private ListView leftDrawerList;
     private ArrayAdapter<String> navi;
-    private String[] leftSliderData1={"Login", "Sign Up"};
+    private String[] leftSliderData1={"로그인", "회원가입"};
 
     private EditText idet, emailet, pwet,pwchet;
     private Button signupbt;
@@ -127,12 +127,11 @@ public class SignUpActivity extends ActionBarActivity implements View.OnClickLis
         switch (position) {
             case 0:
                 drawerLayout.closeDrawers();
-                break;
-            case 1:
-                drawerLayout.closeDrawers();
-                Intent intent = new Intent(this, SignUpActivity.class);
+                Intent intent = new Intent(this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
+            case 1:
+                drawerLayout.closeDrawers();
                 break;
         }
     }

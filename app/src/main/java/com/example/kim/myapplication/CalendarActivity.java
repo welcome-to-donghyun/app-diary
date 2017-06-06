@@ -14,11 +14,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.List;
+
+import static com.example.kim.myapplication.R.id.calendarView;
 
 public class CalendarActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
 
@@ -27,9 +30,10 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
     private ActionBarDrawerToggle drawerToggle;
     private ListView leftDrawerList, memoList;
     private ArrayAdapter<String> navi,memo;
-    private String[] leftSliderData1={"Home", "Logout", "diary"};
+    private String[] leftSliderData1={"홈 화면", "로그아웃"};
     private String[] memodata={"장볼거리", "은행 계좌", "과제"};
     private Button writebutton;
+    private CalendarView calendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,17 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
             setSupportActionBar(toolbar);
         }
         initDrawer();
+        calendar = (CalendarView) findViewById(R.id.calendarView);
+        calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener(){
+
+            @Override
+            public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
+                Intent intent = new Intent(getApplicationContext(), DiaryWriteActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+
 
         writebutton = (Button)findViewById(R.id.memobutton);
         writebutton.setOnClickListener(this);
@@ -72,13 +87,6 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();
-                        break;
-                    case 2:
-                        drawerLayout.closeDrawers();
-                        intent = new Intent(getApplicationContext(), DiaryWriteActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        break;
                 }
             }
         });
@@ -129,10 +137,20 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(this, MemoViewActivity.class);;
+        Intent intent;
 
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+        switch(position){
+            case 0 :
+                intent = new Intent(this, MemoViewActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                break;
+            case 1 :
+                intent = new Intent(this, DiaryViewActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                break;
+        }
 
         Toast.makeText(getApplicationContext(), memodata[position], Toast.LENGTH_LONG).show();
 

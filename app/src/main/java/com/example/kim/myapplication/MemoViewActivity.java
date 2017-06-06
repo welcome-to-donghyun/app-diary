@@ -21,7 +21,7 @@ public class MemoViewActivity extends ActionBarActivity implements View.OnClickL
     private ActionBarDrawerToggle drawerToggle;
     private ListView leftDrawerList;
     private ArrayAdapter<String> navi;
-    private String[] leftSliderData1={"Home", "Logout"};
+    private String[] leftSliderData1={"홈 화면", "로그아웃"};
 
     private Button editbt, deletebt;
 

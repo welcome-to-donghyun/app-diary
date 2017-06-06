@@ -22,7 +22,7 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
     private ActionBarDrawerToggle drawerToggle;
     private ListView leftDrawerList;
     private ArrayAdapter<String> navi;
-    private String[] leftSliderData1={"Home", "Logout"};
+    private String[] leftSliderData1={"홈 화면", "로그아웃"};
     private Button editbt, deletebt;
 
     @Override
@@ -93,7 +93,7 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
         Intent intent;
         switch(v.getId()){
             case R.id.editButton :
-                intent = new Intent(this, MemoWriteActivity.class);
+                intent = new Intent(this, DiaryWriteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 break;

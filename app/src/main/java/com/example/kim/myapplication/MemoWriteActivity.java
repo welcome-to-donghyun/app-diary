@@ -27,7 +27,7 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
     private ActionBarDrawerToggle drawerToggle;
     private ListView leftDrawerList;
     private ArrayAdapter<String> navi;
-    private String[] leftSliderData1={"Home", "Logout"};
+    private String[] leftSliderData1={"홈 화면", "로그아웃"};
     private LinearLayout ll;
     private EditText titleet, contentet;
     private Button writebt;

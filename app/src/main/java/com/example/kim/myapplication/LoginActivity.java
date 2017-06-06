@@ -41,7 +41,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private ActionBarDrawerToggle drawerToggle;
     private ListView leftDrawerList;
     private ArrayAdapter<String> navi;
-    private String[] leftSliderData1 = {"Login", "Sign Up"};
+    private String[] leftSliderData1 = {"로그인", "회원가입"};
     private LinearLayout ll;
 
     @Override
