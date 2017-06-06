@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+tools:context="com.example.kim.myapplication.DiaryWriteActivity"
+android:orientation="vertical">
+
+
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?actionBarSize"
+    android:background="?attr/colorPrimary"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/drawerLayout"
+    tools:context=".DiaryWriteActivity"
+    >
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/linearLaoyout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.example.kim.myapplication.DiaryWriteActivity"
+        android:orientation="vertical">
+
+        <EditText
+            android:layout_width="@dimen/demo_button_min_width"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_margin="10dp"
+            android:minHeight="@dimen/demo_button_min_height"
+            android:minWidth="@dimen/demo_button_min_width"
+            android:ems="20"
+            android:hint="다이어리 제목"
+            android:inputType="text"
+            android:id="@+id/titleEditText" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_gravity="left"
+            android:layout_margin="10dp"
+            android:hint="다이어리 내용"
+            android:inputType="text"
+            android:id="@+id/contentEditText" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="right">
+            <info.hoang8f.widget.FButton
+                android:id="@+id/fileaddButton"
+                android:layout_width="@dimen/button_min_width"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:minWidth="@dimen/demo_button_min_width"
+                android:text="파일추가"
+                android:textColor="@android:color/white"
+                fbutton:buttonColor="@color/fbutton_color_sun_flower"
+                fbutton:shadowEnabled="true" />
+
+            <info.hoang8f.widget.FButton
+                android:id="@+id/writeButton"
+                android:layout_width="@dimen/button_min_width"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:minHeight="@dimen/button_min_height"
+                android:minWidth="@dimen/button_min_width"
+                android:text="작성완료"
+                android:textColor="@android:color/white"
+                fbutton:buttonColor="@color/fbutton_color_turquoise"
+                fbutton:shadowEnabled="true" />
+        </LinearLayout>
+
+    </LinearLayout>
+    </ScrollView>
+    <LinearLayout
+        android:background="#fff"
+        android:layout_gravity="left|start"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_margin="10dp"
+            android:id="@+id/idTextView"
+            android:text="UserID"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:textColor="#000"/>
+
+        <ListView
+            android:id="@+id/left_drawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#fff"
+            android:divider="#eee"
+            android:dividerHeight="1dp"/>
+    </LinearLayout>
+</android.support.v4.widget.DrawerLayout>
+
+</LinearLayout>

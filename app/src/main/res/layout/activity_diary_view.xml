@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+tools:context="com.example.kim.myapplication.DiaryViewActivity"
+android:orientation="vertical">
+
+
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?actionBarSize"
+    android:background="?attr/colorPrimary"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/drawerLayout"
+    tools:context=".DiaryViewActivity"
+    >
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/activity_calendar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.example.kim.myapplication.DiaryViewActivity"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_margin="10dp"
+            android:id="@+id/titleTextView"
+            android:text="오늘의 일기"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:textColor="#000"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_margin="10dp"
+            android:id="@+id/contentTextView"
+            android:text="참 재미있었다."
+            android:textSize="20dp"
+            android:textColor="#000"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom">
+            <info.hoang8f.widget.FButton
+                android:id="@+id/editButton"
+                android:layout_width="@dimen/button_min_width"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:minWidth="@dimen/demo_button_min_width"
+                android:text="편집"
+                android:textColor="@android:color/white"
+                fbutton:buttonColor="@color/fbutton_color_sun_flower"
+                fbutton:shadowEnabled="true" />
+
+            <info.hoang8f.widget.FButton
+                android:id="@+id/deleteButton"
+                android:layout_width="@dimen/button_min_width"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:minHeight="@dimen/button_min_height"
+                android:minWidth="@dimen/button_min_width"
+                android:text="삭제"
+                android:textColor="@android:color/white"
+                fbutton:buttonColor="@color/fbutton_color_alizarin"
+                fbutton:shadowEnabled="true" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+    </ScrollView>
+    <LinearLayout
+        android:background="#fff"
+        android:layout_gravity="left|start"
+        android:layout_width="200dp"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_margin="10dp"
+            android:id="@+id/idTextView"
+            android:text="UserID"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:textColor="#000"/>
+
+        <ListView
+            android:id="@+id/left_drawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#fff"
+            android:divider="#eee"
+            android:dividerHeight="1dp"/>
+    </LinearLayout>
+</android.support.v4.widget.DrawerLayout>
+
+</LinearLayout>
