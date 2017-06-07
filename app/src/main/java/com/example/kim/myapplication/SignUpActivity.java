@@ -19,6 +19,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SignUpActivity extends ActionBarActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
     private Toolbar toolbar;
@@ -31,6 +35,7 @@ public class SignUpActivity extends ActionBarActivity implements View.OnClickLis
     private EditText idet, emailet, pwet,pwchet;
     private Button signupbt;
     private LinearLayout ll;
+    private Dao dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,9 @@ public class SignUpActivity extends ActionBarActivity implements View.OnClickLis
             setSupportActionBar(toolbar);
         }
         initDrawer();
+
+        dao = new Dao(getApplicationContext());
+
 
         ll=(LinearLayout)findViewById(R.id.linearLaoyout);
         idet = (EditText) findViewById(R.id.idEditText);
@@ -107,10 +115,7 @@ public class SignUpActivity extends ActionBarActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.signupButton:
-                Intent intent = new Intent(this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+                signupButton();
                 break;
             case R.id.linearLaoyout :
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -134,5 +139,46 @@ public class SignUpActivity extends ActionBarActivity implements View.OnClickLis
                 drawerLayout.closeDrawers();
                 break;
         }
+    }
+
+    private void signupButton(){
+        String id,pw,pwch,email;
+
+        if(idet.getText().toString().equals("") || pwet.getText().toString().equals("") || emailet.getText().toString().equals("") || pwchet.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(),"빈칸을 모두 채워주세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        else if(!(pwet.getText().toString().equals(pwchet.getText().toString()))){
+            Toast.makeText(getApplicationContext(),"비밀번호가 다릅니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        id =idet.getText().toString();
+        pw =pwet.getText().toString();
+        email=emailet.getText().toString();
+
+        if(!(isEmailValid(email))){
+            Toast.makeText(getApplicationContext(),"이메일을 바로 입력해주세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if(dao.sigupCheck(id,pw,email)){
+            Toast.makeText(getApplicationContext(),"이미 있는 아이디 입니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        else{
+            Toast.makeText(getApplicationContext(),"회원가입이 완료 되었습니다.", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        }
+    }
+
+    public static boolean isEmailValid(String email) {
+        String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 }

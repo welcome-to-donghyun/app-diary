@@ -34,6 +34,8 @@ android:orientation="vertical">
         xmlns:tools="http://schemas.android.com/tools"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/linearLaoyout"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.example.kim.myapplication.DiaryWriteActivity"
@@ -50,6 +52,11 @@ android:orientation="vertical">
             android:hint="다이어리 제목"
             android:inputType="text"
             android:id="@+id/titleEditText" />
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/test" />
 
         <EditText
             android:layout_width="match_parent"

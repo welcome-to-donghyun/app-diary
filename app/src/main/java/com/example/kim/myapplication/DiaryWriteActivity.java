@@ -1,13 +1,19 @@
 package com.example.kim.myapplication;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -15,12 +21,17 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class DiaryWriteActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
+public class DiaryWriteActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
+    final int REQ_CODE_SELECT_IMAGE=100;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -30,6 +41,12 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
     private LinearLayout ll;
     private EditText titleet, contentet;
     private Button filebt, writebt;
+    private String img,date;
+    private Dao dao;
+    private int uno;
+    private TextView textView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +58,15 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
             setSupportActionBar(toolbar);
         }
         initDrawer();
+
+        img=null;
+        dao = new Dao(getApplicationContext());
+        uno = getIntent().getExtras().getInt("uno");
+        date=getIntent().getExtras().getString("");
+
+
+        textView = (TextView)findViewById(R.id.idTextView);
+        textView.setText(dao.getUserId(uno));
 
         titleet = (EditText)findViewById(R.id.titleEditText);
         contentet = (EditText)findViewById(R.id.contentEditText);
@@ -103,13 +129,87 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
                 imm.hideSoftInputFromWindow(contentet.getWindowToken(), 0);
                 break;
             case R.id.writeButton:
-                Toast.makeText(getApplicationContext(), "다이어리가 추가 되었습니다", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(this, CalendarActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+                writeButton();
+                break;
+            case R.id.fileaddButton:
+                fileaddButton();
                 break;
         }
     }
+
+    private void writeButton(){
+        String title,content;
+
+        if(titleet.getText().toString().equals("") || contentet.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "제목과 내용을 채워주세요", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        title = titleet.getText().toString();
+        content = contentet.getText().toString();
+
+        dao.insertdiary(uno, title,content,img,date);
+        Toast.makeText(getApplicationContext(), "다이어리가 추가 되었습니다", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, CalendarActivity.class);
+        intent.putExtra("uno", uno);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void fileaddButton(){
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+        intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQ_CODE_SELECT_IMAGE);
+
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Toast.makeText(getBaseContext(), "resultCode : "+resultCode,Toast.LENGTH_SHORT).show();
+
+        if(requestCode == REQ_CODE_SELECT_IMAGE){
+            if(resultCode== Activity.RESULT_OK) {
+                try {
+                    //Uri에서 이미지 이름을 얻어온다.
+                    String name_Str = getImageNameToUri(data.getData());
+                    img = name_Str;
+                    //이미지 데이터를 비트맵으로 받아온다.
+                    Bitmap image_bitmap 	= MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                    ImageView image = (ImageView)findViewById(R.id.imageView);
+
+                    //배치해놓은 ImageView에 set
+                    image.setImageBitmap(image_bitmap);
+
+                    //Toast.makeText(getBaseContext(), "name_Str : "+name_Str , Toast.LENGTH_SHORT).show();
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+
+    public String getImageNameToUri(Uri data) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(data, proj, null, null, null);
+
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+
+        cursor.moveToFirst();
+
+        String imgPath = cursor.getString(column_index);
+        String imgName = imgPath.substring(imgPath.lastIndexOf("/")+1);
+
+        return imgName;
+    }
+
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -119,6 +219,7 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
                 drawerLayout.closeDrawers();
                 intent = new Intent(this, CalendarActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("uno", uno);
                 startActivity(intent);
                 finish();
                 break;

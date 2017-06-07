@@ -2,6 +2,7 @@ package com.example.kim.myapplication;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.support.annotation.NonNull;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -17,13 +18,22 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static com.example.kim.myapplication.R.id.calendarView;
 
-public class CalendarActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
+public class CalendarActivity extends AppCompatActivity implements OnDateSelectedListener, View.OnClickListener, AdapterView.OnItemClickListener{
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
@@ -31,9 +41,13 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
     private ListView leftDrawerList, memoList;
     private ArrayAdapter<String> navi,memo;
     private String[] leftSliderData1={"홈 화면", "로그아웃"};
-    private String[] memodata={"장볼거리", "은행 계좌", "과제"};
+
+    private ArrayList<DtoMemo> memodata;
     private Button writebutton;
-    private CalendarView calendar;
+    private MaterialCalendarView calendar;
+    private int uno;
+    private TextView textView;
+    private Dao dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,22 +60,27 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
             setSupportActionBar(toolbar);
         }
         initDrawer();
-        calendar = (CalendarView) findViewById(R.id.calendarView);
-        calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener(){
 
-            @Override
-            public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-                Intent intent = new Intent(getApplicationContext(), DiaryWriteActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-            }
-        });
+        //calendarFunction();
+
+        dao = new Dao(getApplicationContext());
+
+        uno = getIntent().getExtras().getInt("uno");
+        textView = (TextView)findViewById(R.id.idTextView);
+        textView.setText(dao.getUserId(uno));
+
+        //하단에 메모 리스트를 만들기 위한 코드
+        memodata = dao.getMemo(uno);
+        int length = memodata.size();
+        String [] memoListData = new String[length];
+        for(int i=0;i<memodata.size();i++)
+            memoListData[i] = memodata.get(i).getMtitle();
 
 
         writebutton = (Button)findViewById(R.id.memobutton);
         writebutton.setOnClickListener(this);
         memoList=(ListView)findViewById(R.id.memoList);
-        memo=new ArrayAdapter<String>(CalendarActivity.this, android.R.layout.simple_list_item_1, memodata);
+        memo=new ArrayAdapter<String>(CalendarActivity.this, android.R.layout.simple_list_item_1, memoListData);
         memoList.setAdapter(memo);
         setListViewHeightBasedOnChildren(memoList);
         memoList.setOnItemClickListener(this);
@@ -130,6 +149,8 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
             case R.id.memobutton:
                 Intent intent = new Intent(this, MemoWriteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("editmno", -1);
+                intent.putExtra("uno", uno);
                 startActivity(intent);
                 break;
         }
@@ -138,8 +159,14 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent;
+        intent = new Intent(this, MemoViewActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        switch(position){
+        intent.putExtra("uno", uno);
+        intent.putExtra("mno", memodata.get(position).getMno());
+        startActivity(intent);
+
+/*        switch(position){
             case 0 :
                 intent = new Intent(this, MemoViewActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -150,14 +177,20 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 break;
-        }
-
-        Toast.makeText(getApplicationContext(), memodata[position], Toast.LENGTH_LONG).show();
-
-
-
+        }*/
     }
 
+    /*public  void calendarFunction(){
+        ArrayList<DtoDiary> diary = dao.getDiary(uno);
+
+        calendar = (MaterialCalendarView) findViewById(R.id.calendarView);
+        calendar.setOnDateChangedListener(this);
+        calendar.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
+
+
+    }*/
+
+    //메모 리스트 뷰의 높이 지정
     public static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
@@ -178,5 +211,13 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
         params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
         listView.setLayoutParams(params);
         listView.requestLayout();
+    }
+
+    @Override
+    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+        Intent intent = new Intent(getApplicationContext(), DiaryWriteActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("uno", uno);
+        startActivity(intent);
     }
 }

@@ -37,15 +37,21 @@
                     android:id="@+id/activity_calendar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     tools:context="com.example.kim.myapplication.CalendarActivity"
                     android:orientation="vertical"
                     android:paddingRight="5px">
 
-                    <CalendarView
+                    <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/calendarView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
-                        android:id="@+id/calendarView" />
+                        app:mcv_showOtherDates="all"
+                        app:mcv_selectionColor="#00F"
+                        />
 
                     <info.hoang8f.widget.FButton
                         android:id="@+id/memobutton"

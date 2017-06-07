@@ -50,6 +50,12 @@ android:orientation="vertical">
             android:textStyle="bold"
             android:textColor="#000"/>
 
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/test" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,6 +71,7 @@ android:orientation="vertical">
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="bottom">
+
             <info.hoang8f.widget.FButton
                 android:id="@+id/editButton"
                 android:layout_width="@dimen/button_min_width"

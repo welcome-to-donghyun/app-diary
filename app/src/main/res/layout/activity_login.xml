@@ -31,6 +31,8 @@
             android:id="@+id/linearLaoyout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:layout_marginTop="100dp"
             android:gravity="center_horizontal"
             tools:context="com.example.kim.myapplication.LoginActivity"
