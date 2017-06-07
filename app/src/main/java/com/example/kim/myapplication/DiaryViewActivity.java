@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class DiaryViewActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
 
@@ -27,6 +28,12 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
     private Button editbt, deletebt;
     private ImageView imageView;
 
+    private Dao dao;
+    private int dno, uno;
+    private TextView textView;
+    private TextView titleText, contentText;
+    private DtoDiary diary;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +45,22 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
             setSupportActionBar(toolbar);
         }
         initDrawer();
+
+        dao = new Dao(getApplicationContext());
+        uno = getIntent().getExtras().getInt("uno");
+        dno = getIntent().getExtras().getInt("dno");
+
+        diary = dao.getDiarydno(uno,dno);
+
+        textView = (TextView)findViewById(R.id.idTextView);
+        textView.setText(dao.getUserId(uno));
+
+        titleText = (TextView)findViewById(R.id.titleTextView);
+        contentText = (TextView)findViewById(R.id.contentTextView);
+        titleText.setText(diary.getDtitle());
+        contentText.setText(diary.getDcontent());
+        imageView = (ImageView)findViewById(R.id.imageView);
+
 
         editbt=(Button)findViewById(R.id.editButton);
         deletebt=(Button)findViewById(R.id.deleteButton);
@@ -102,7 +125,9 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
                 break;
             case R.id.deleteButton :
                 intent = new Intent(this, CalendarActivity.class);
+                dao.deletediary(dno);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("uno", uno);
                 startActivity(intent);
                 break;
         }
@@ -116,6 +141,7 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
                 drawerLayout.closeDrawers();
                 intent = new Intent(this, CalendarActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("uno", uno);
                 startActivity(intent);
                 finish();
                 break;

@@ -34,8 +34,9 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
     private EditText titleet, contentet;
     private Button writebt;
     private Dao dao;
-    private int uno;
+    private int uno, editmno, mno;
     private TextView textView;
+    private DtoMemo memo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +51,7 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
         initDrawer();
         dao = new Dao(getApplicationContext());
         uno = getIntent().getExtras().getInt("uno");
-        Log.i("MEMOWRITE", ""+uno);
+        editmno = getIntent().getExtras().getInt("editmno");
 
         textView = (TextView)findViewById(R.id.idTextView);
         textView.setText(dao.getUserId(uno));
@@ -60,6 +61,12 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
         writebt = (Button)findViewById(R.id.writeButton);
         ll=(LinearLayout)findViewById(R.id.linearLaoyout);
 
+        if(editmno != -1) {
+            mno = editmno;
+            memo = dao.getMemomno(uno,mno);
+            titleet.setText(memo.getMtitle());
+            contentet.setText(memo.getMcontent());
+        }
         writebt.setOnClickListener(this);
         ll.setOnClickListener(this);
     }
@@ -107,9 +114,6 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
-
-
-
         switch (v.getId()) {
             case R.id.linearLaoyout :
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -132,16 +136,20 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
         title = titleet.getText().toString();
         content = contentet.getText().toString();
 
-        Log.i("wirteButton", ""+uno);
-        Log.i("wirteButton", title);
-        Log.i("wirteButton", content);
-        dao.insertmemo(uno, title,content);
-        Toast.makeText(getApplicationContext(), "메모가 추가 되었습니다", Toast.LENGTH_LONG).show();
+        if(editmno ==-1) {
+            dao.insertmemo(uno, title, content);
+            Toast.makeText(getApplicationContext(), "메모가 추가 되었습니다", Toast.LENGTH_LONG).show();
+        }
+        else{
+            dao.updatememo(mno, title, content);
+            Toast.makeText(getApplicationContext(), "메모가 수정 되었습니다", Toast.LENGTH_LONG).show();
+        }
         Intent intent = new Intent(this, CalendarActivity.class);
         intent.putExtra("uno", uno);
-        Log.i("wirteButton", "FUCKKKKKKKKKKKKK");
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+
+
     }
 
     @Override

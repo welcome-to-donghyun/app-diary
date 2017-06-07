@@ -52,6 +52,11 @@ android:orientation="vertical">
             android:hint="다이어리 제목"
             android:inputType="text"
             android:id="@+id/titleEditText" />
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/test" />
 
         <EditText
             android:layout_width="match_parent"

@@ -10,13 +10,24 @@ public class DtoDiary {
     private String dtitle;
     private String dcontent;
     private String dimg;
+    private String ddate;
 
-    public DtoDiary(int dno, int uno, String dtitle, String dcontent, String dimg) {
+
+    public DtoDiary(int dno, int uno, String dtitle, String dcontent, String dimg, String ddate) {
         this.dno = dno;
         this.uno = uno;
         this.dtitle = dtitle;
         this.dcontent = dcontent;
         this.dimg = dimg;
+        this.ddate = ddate;
+    }
+
+    public String getDdate() {
+        return ddate;
+    }
+
+    public void setDdate(String ddate) {
+        this.ddate = ddate;
     }
 
     public int getDno() {

@@ -117,7 +117,8 @@ public class MemoViewActivity extends ActionBarActivity implements View.OnClickL
             case R.id.editButton :
                 intent = new Intent(this, MemoWriteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
+                intent.putExtra("editmno", mno);
+                intent.putExtra("uno", uno);
                 startActivity(intent);
                 break;
             case R.id.deleteButton :

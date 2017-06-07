@@ -27,6 +27,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
     compile 'com.android.support:support-v4:25.1.0'
+    compile 'com.prolificinteractive:material-calendarview:1.4.3'
     compile 'info.hoang8f:fbutton:1.0.5'
     testCompile 'junit:junit:4.12'
 
