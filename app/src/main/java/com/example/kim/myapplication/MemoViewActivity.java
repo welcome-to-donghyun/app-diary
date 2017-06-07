@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class MemoViewActivity extends ActionBarActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
     private Toolbar toolbar;
@@ -24,6 +25,11 @@ public class MemoViewActivity extends ActionBarActivity implements View.OnClickL
     private String[] leftSliderData1={"홈 화면", "로그아웃"};
 
     private Button editbt, deletebt;
+    private Dao dao;
+    private int mno, uno;
+    private TextView textView;
+    private TextView titleText, contentText;
+    private DtoMemo memo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +42,21 @@ public class MemoViewActivity extends ActionBarActivity implements View.OnClickL
             setSupportActionBar(toolbar);
         }
         initDrawer();
+
+        dao = new Dao(getApplicationContext());
+        uno = getIntent().getExtras().getInt("uno");
+        mno = getIntent().getExtras().getInt("mno");
+
+        memo = dao.getMemomno(uno,mno);
+
+
+        textView = (TextView)findViewById(R.id.idTextView);
+        textView.setText(dao.getUserId(uno));
+
+        titleText = (TextView)findViewById(R.id.titleTextView);
+        contentText = (TextView)findViewById(R.id.contentTextView);
+        titleText.setText(memo.getMtitle());
+        contentText.setText(memo.getMcontent());
 
         editbt=(Button)findViewById(R.id.editButton);
         deletebt=(Button)findViewById(R.id.deleteButton);
@@ -96,11 +117,14 @@ public class MemoViewActivity extends ActionBarActivity implements View.OnClickL
             case R.id.editButton :
                 intent = new Intent(this, MemoWriteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
                 startActivity(intent);
                 break;
             case R.id.deleteButton :
                 intent = new Intent(this, CalendarActivity.class);
+                dao.deletememo(mno);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("uno", uno);
                 startActivity(intent);
                 break;
         }
@@ -114,6 +138,7 @@ public class MemoViewActivity extends ActionBarActivity implements View.OnClickL
                 drawerLayout.closeDrawers();
                 intent = new Intent(this, CalendarActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("uno", uno);
                 startActivity(intent);
                 finish();
                 break;
