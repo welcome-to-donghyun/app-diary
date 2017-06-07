@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MemoWriteActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
@@ -31,6 +33,9 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
     private LinearLayout ll;
     private EditText titleet, contentet;
     private Button writebt;
+    private Dao dao;
+    private int uno;
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,12 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
             setSupportActionBar(toolbar);
         }
         initDrawer();
+        dao = new Dao(getApplicationContext());
+        uno = getIntent().getExtras().getInt("uno");
+        Log.i("MEMOWRITE", ""+uno);
+
+        textView = (TextView)findViewById(R.id.idTextView);
+        textView.setText(dao.getUserId(uno));
 
         titleet = (EditText)findViewById(R.id.titleEditText);
         contentet = (EditText)findViewById(R.id.contentEditText);
@@ -96,6 +107,9 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
+
+
+
         switch (v.getId()) {
             case R.id.linearLaoyout :
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -103,12 +117,31 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
                 imm.hideSoftInputFromWindow(contentet.getWindowToken(), 0);
                 break;
             case R.id.writeButton:
-                Toast.makeText(getApplicationContext(), "메모가 추가 되었습니다", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(this, CalendarActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+                writeButton();
                 break;
         }
+    }
+
+    private void writeButton(){
+        String title,content;
+
+        if(titleet.getText().toString().equals("") || contentet.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "제목과 내용을 채워주세요", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        title = titleet.getText().toString();
+        content = contentet.getText().toString();
+
+        Log.i("wirteButton", ""+uno);
+        Log.i("wirteButton", title);
+        Log.i("wirteButton", content);
+        dao.insertmemo(uno, title,content);
+        Toast.makeText(getApplicationContext(), "메모가 추가 되었습니다", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, CalendarActivity.class);
+        intent.putExtra("uno", uno);
+        Log.i("wirteButton", "FUCKKKKKKKKKKKKK");
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     @Override
@@ -118,6 +151,7 @@ public class MemoWriteActivity extends AppCompatActivity implements View.OnClick
             case 0:
                 drawerLayout.closeDrawers();
                 intent = new Intent(this, CalendarActivity.class);
+                intent.putExtra("uno", uno);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();

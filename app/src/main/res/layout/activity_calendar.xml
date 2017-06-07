@@ -37,6 +37,8 @@
                     android:id="@+id/activity_calendar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     tools:context="com.example.kim.myapplication.CalendarActivity"
                     android:orientation="vertical"
                     android:paddingRight="5px">

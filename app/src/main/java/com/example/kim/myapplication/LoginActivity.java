@@ -44,6 +44,8 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private String[] leftSliderData1 = {"로그인", "회원가입"};
     private LinearLayout ll;
 
+    private Dao dao;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +57,10 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             setSupportActionBar(toolbar);
         }
         initDrawer();
+
+        dao = new Dao(getApplicationContext());
+        //String jsonFile = dao.getJsonTestData();
+        //dao.insertJsonData(jsonFile);
 
         ll=(LinearLayout)findViewById(R.id.linearLaoyout);
         idet = (EditText) findViewById(R.id.idEditText);
@@ -112,10 +118,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.loginButton:
-                Intent intent = new Intent(this, CalendarActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+                logInButton();
                 break;
             case R.id.linearLaoyout :
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -138,6 +141,32 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                 startActivity(intent);
                 break;
         }
+    }
+
+    private void logInButton(){
+
+        String id,pw;
+        int uno;
+
+        if(idet.getText().toString().equals("") || pwet.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "ID와 Password를 채워주세요", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        id =idet.getText().toString();
+        pw =pwet.getText().toString();
+
+        if(dao.loginCheck(id, pw)){
+            Toast.makeText(getApplicationContext(),"아이디 또는 비밀번호를 다시 확인해 주세요", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            uno = dao.getuno(id);
+            Intent intent = new Intent(this, CalendarActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("uno", uno);
+            startActivity(intent);
+            finish();
+        }
+
     }
 
 }

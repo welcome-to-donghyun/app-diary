@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 public class DiaryViewActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
@@ -24,6 +25,7 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
     private ArrayAdapter<String> navi;
     private String[] leftSliderData1={"홈 화면", "로그아웃"};
     private Button editbt, deletebt;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +41,8 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
 
         editbt=(Button)findViewById(R.id.editButton);
         deletebt=(Button)findViewById(R.id.deleteButton);
-
+        imageView = (ImageView)findViewById(R.id.imageView);
+        imageView.setImageResource(R.drawable.test);
         editbt.setOnClickListener(this);
         deletebt.setOnClickListener(this);
     }

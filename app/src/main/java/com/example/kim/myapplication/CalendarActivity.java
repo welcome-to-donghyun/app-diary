@@ -17,8 +17,10 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.kim.myapplication.R.id.calendarView;
@@ -31,9 +33,13 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
     private ListView leftDrawerList, memoList;
     private ArrayAdapter<String> navi,memo;
     private String[] leftSliderData1={"홈 화면", "로그아웃"};
-    private String[] memodata={"장볼거리", "은행 계좌", "과제"};
+
+    private ArrayList<DtoMemo> memodata;
     private Button writebutton;
     private CalendarView calendar;
+    private int uno;
+    private TextView textView;
+    private Dao dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +63,23 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
             }
         });
 
+        dao = new Dao(getApplicationContext());
+
+        uno = getIntent().getExtras().getInt("uno");
+        textView = (TextView)findViewById(R.id.idTextView);
+        textView.setText(dao.getUserId(uno));
+
+        memodata = dao.getMemo(uno);
+        int length = memodata.size();
+        String [] memoListData = new String[length];
+        for(int i=0;i<memodata.size();i++)
+            memoListData[i] = memodata.get(i).getMtitle();
+
 
         writebutton = (Button)findViewById(R.id.memobutton);
         writebutton.setOnClickListener(this);
         memoList=(ListView)findViewById(R.id.memoList);
-        memo=new ArrayAdapter<String>(CalendarActivity.this, android.R.layout.simple_list_item_1, memodata);
+        memo=new ArrayAdapter<String>(CalendarActivity.this, android.R.layout.simple_list_item_1, memoListData);
         memoList.setAdapter(memo);
         setListViewHeightBasedOnChildren(memoList);
         memoList.setOnItemClickListener(this);
@@ -130,6 +148,8 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
             case R.id.memobutton:
                 Intent intent = new Intent(this, MemoWriteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                Log.i("Cal : ", ""+uno);
+                intent.putExtra("uno", uno);
                 startActivity(intent);
                 break;
         }
@@ -138,8 +158,14 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent intent;
+        intent = new Intent(this, MemoViewActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        switch(position){
+        intent.putExtra("uno", uno);
+        intent.putExtra("mno", memodata.get(position).getMno());
+        startActivity(intent);
+
+/*        switch(position){
             case 0 :
                 intent = new Intent(this, MemoViewActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -150,12 +176,7 @@ public class CalendarActivity extends AppCompatActivity implements View.OnClickL
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 break;
-        }
-
-        Toast.makeText(getApplicationContext(), memodata[position], Toast.LENGTH_LONG).show();
-
-
-
+        }*/
     }
 
     public static void setListViewHeightBasedOnChildren(ListView listView) {
