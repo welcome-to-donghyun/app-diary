@@ -1,5 +1,6 @@
 package com.example.kim.myapplication;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,8 +22,8 @@ public class Dao {
         database = context.openOrCreateDatabase("LocalDATA.db", SQLiteDatabase.CREATE_IF_NECESSARY, null);
 
         try {
-            sql = "DROP TABLE IF EXISTS Diary";
-            database.execSQL(sql);
+            //sql = "DROP TABLE IF EXISTS Diary";
+            //database.execSQL(sql);
             sql = "CREATE TABLE IF NOT EXISTS User("
                     + "uno integer primary key autoincrement,"
                     + "uid text not null,"
@@ -41,7 +42,7 @@ public class Dao {
                     + "uno integer not null,"
                     + "dtitle text not null,"
                     + "dcontent text not null,"
-                    + "dimg text,"
+                    + "dimg blob,"
                     + "ddate text not null,"
                     + "FOREIGN KEY (uno) REFERENCES User(uno));";
             database.execSQL(sql);
@@ -189,53 +190,6 @@ public class Dao {
         return memo;
     }
 
-    public DtoDiary getDiarydno(int uno, int dno) {
-        DtoDiary diary = null;
-
-        String dtitle;
-        String dcontent;
-        String dimg;
-        String ddate;
-
-        String sql = "SELECT * FROM Diary WHERE uno = "+uno+" AND mno ="+dno+";";
-        Cursor cursor = database.rawQuery(sql, null);
-
-        while (cursor.moveToNext()) {
-            dtitle = cursor.getString(2);
-            dcontent = cursor.getString(3);
-            dimg = cursor.getString(4);
-            ddate=cursor.getString(5);
-            diary = new DtoDiary(dno, uno, dtitle, dcontent, dimg,ddate);
-        }
-        cursor.close();
-        return diary;
-    }
-
-    public ArrayList<DtoDiary> getDiary(int uno) {
-        ArrayList<DtoDiary> diary = new ArrayList<DtoDiary>();
-
-        int dno;
-        String dtitle;
-        String dcontent;
-        String dimg;
-        String ddate;
-
-        String sql = "SELECT * FROM Memo WHERE uno = "+uno+";";
-        Cursor cursor = database.rawQuery(sql, null);
-
-        while (cursor.moveToNext()) {
-            dno = cursor.getInt(0);
-            dtitle = cursor.getString(2);
-            dcontent = cursor.getString(3);
-            dimg=cursor.getString(4);
-            ddate=cursor.getString(5);
-            diary.add(new DtoDiary(dno, uno, dtitle, dcontent,dimg,ddate));
-        }
-        cursor.close();
-        return diary;
-    }
-
-
     public void insertmemo(int uno, String title, String content){
         String sql = "INSERT INTO Memo(uno, mtitle, mcontent)"
                 + " VALUES(" + uno + ", '" + title + "', '" + content + "');";
@@ -253,17 +207,6 @@ public class Dao {
             e.printStackTrace();
         }
     }
-
-    public void insertdiary(int uno, String title, String content, String img, String date){
-        String sql = "INSERT INTO Memo(uno, dtitle, dcontent,dimg,ddate)"
-                + " VALUES(" + uno + ", '" + title + "', '" + content + "', '"+img+"', '"+date+"');";
-        try {
-            database.execSQL(sql);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void deletememo(int mno){
         String sql = "DELETE FROM Memo WHERE mno =" +mno+";";
         try {
@@ -273,8 +216,106 @@ public class Dao {
         }
     }
 
+    public ArrayList<DtoDiary> getDiary(int uno) {
+        ArrayList<DtoDiary> diary = new ArrayList<DtoDiary>();
+
+        int dno;
+        String dtitle;
+        String dcontent;
+        byte [] dimg;
+        String ddate;
+
+        String sql = "SELECT * FROM Diary WHERE uno = "+uno+";";
+        Cursor cursor = database.rawQuery(sql, null);
+
+        while (cursor.moveToNext()) {
+            dno = cursor.getInt(0);
+            dtitle = cursor.getString(2);
+            dcontent = cursor.getString(3);
+            dimg=cursor.getBlob(4);
+            ddate=cursor.getString(5);
+            diary.add(new DtoDiary(dno, uno, dtitle, dcontent,dimg,ddate));
+        }
+        cursor.close();
+        return diary;
+    }
+
+    public DtoDiary getDiarydno(int uno, int dno) {
+        DtoDiary diary = null;
+
+        String dtitle;
+        String dcontent;
+        byte [] dimg;
+        String ddate;
+
+        String sql = "SELECT * FROM Diary WHERE uno = "+uno+" AND dno ="+dno+";";
+        Cursor cursor = database.rawQuery(sql, null);
+
+        while (cursor.moveToNext()) {
+            dtitle = cursor.getString(2);
+            dcontent = cursor.getString(3);
+            dimg = cursor.getBlob(4);
+            ddate=cursor.getString(5);
+            diary = new DtoDiary(dno, uno, dtitle, dcontent, dimg,ddate);
+        }
+        cursor.close();
+        return diary;
+    }
+
+    public DtoDiary getDiaryddate(int uno, String ddate) {
+        DtoDiary diary = null;
+
+        int dno;
+        String dtitle;
+        String dcontent;
+        byte [] dimg;
+
+        String sql = "SELECT * FROM Diary WHERE uno = "+uno+" AND ddate ='"+ddate+"';";
+        Cursor cursor = database.rawQuery(sql, null);
+
+        while (cursor.moveToNext()) {
+            dno = cursor.getInt(0);
+            dtitle = cursor.getString(2);
+            dcontent = cursor.getString(3);
+            dimg = cursor.getBlob(4);
+            diary = new DtoDiary(dno, uno, dtitle, dcontent, dimg,ddate);
+        }
+        Log.i("테스이빈당ㅇㅇ", ddate);
+        cursor.close();
+        return diary;
+    }
+
+
+    public void insertdiary(int uno, String title, String content, byte [] img, String date){
+        String sql = "INSERT INTO Diary(uno, dtitle, dcontent,ddate)"
+                + " VALUES(" + uno + ", '" + title + "', '" + content + "', '"+date+"');";
+        try {
+            database.execSQL(sql);
+            if(img!=null) {
+                ContentValues values = new ContentValues();
+                values.put("dimg", img);
+                database.insert("Diary", null, values);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updatediary(int dno, String title, String content, byte [] img){
+        String sql = "UPDATE Diary SET dtitle = '"+ title+"', dcontent='"+content+"', dimg='"+img
+                +" WHERE dno="+dno+";";
+        try {
+            database.execSQL(sql);
+            ContentValues values = new ContentValues();
+            values.put("dimg",img);
+            database.update("Diary",values," dno=?",new String[]{""+dno});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void deletediary(int dno){
-        String sql = "DELETE FROM Diary WHERE mno =" +dno+";";
+        String sql = "DELETE FROM Diary WHERE dno =" +dno+";";
         try {
             database.execSQL(sql);
         } catch (Exception e) {

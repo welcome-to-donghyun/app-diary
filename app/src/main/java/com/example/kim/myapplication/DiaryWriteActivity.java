@@ -27,11 +27,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class DiaryWriteActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
-    final int REQ_CODE_SELECT_IMAGE=100;
+    private static final int SELECT_PICTURE = 1;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -41,11 +42,14 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
     private LinearLayout ll;
     private EditText titleet, contentet;
     private Button filebt, writebt;
-    private String img,date;
+    private String date;
+    private byte[] img;
     private Dao dao;
-    private int uno;
+    private int uno, editdno, dno;
     private TextView textView;
-
+    private String selectedImagePath;
+    private ImageView imageView;
+    private DtoDiary diary;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,17 +66,27 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
         img=null;
         dao = new Dao(getApplicationContext());
         uno = getIntent().getExtras().getInt("uno");
-        date=getIntent().getExtras().getString("");
-
+        editdno = getIntent().getExtras().getInt("editdno");
+        date=getIntent().getExtras().getString("date");
 
         textView = (TextView)findViewById(R.id.idTextView);
         textView.setText(dao.getUserId(uno));
 
+        imageView =(ImageView)findViewById(R.id.imageView);
         titleet = (EditText)findViewById(R.id.titleEditText);
         contentet = (EditText)findViewById(R.id.contentEditText);
         filebt = (Button)findViewById(R.id.fileaddButton);
         writebt = (Button)findViewById(R.id.writeButton);
         ll=(LinearLayout)findViewById(R.id.linearLaoyout);
+
+        if(editdno != -1){
+            dno = editdno;
+            diary = dao.getDiarydno(uno,dno);
+            titleet.setText(diary.getDtitle());
+            contentet.setText(diary.getDcontent());
+            img = diary.getDimg();
+            //img 파일도 추가
+        }
 
         writebt.setOnClickListener(this);
         filebt.setOnClickListener(this);
@@ -147,8 +161,14 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
         title = titleet.getText().toString();
         content = contentet.getText().toString();
 
-        dao.insertdiary(uno, title,content,img,date);
-        Toast.makeText(getApplicationContext(), "다이어리가 추가 되었습니다", Toast.LENGTH_LONG).show();
+        if(editdno ==-1) {
+            dao.insertdiary(uno, title,content,img,date);
+            Toast.makeText(getApplicationContext(), "다이어리가 추가 되었습니다", Toast.LENGTH_LONG).show();
+        }
+        else{
+            dao.updatediary(dno, title, content,img);
+            Toast.makeText(getApplicationContext(), "다이어리가 수정 되었습니다", Toast.LENGTH_LONG).show();
+        }
         Intent intent = new Intent(this, CalendarActivity.class);
         intent.putExtra("uno", uno);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -156,58 +176,51 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void fileaddButton(){
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
-        intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, REQ_CODE_SELECT_IMAGE);
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
 
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Toast.makeText(getBaseContext(), "resultCode : "+resultCode,Toast.LENGTH_SHORT).show();
+}
 
-        if(requestCode == REQ_CODE_SELECT_IMAGE){
-            if(resultCode== Activity.RESULT_OK) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == SELECT_PICTURE) {
+                Uri selectedImageUri = data.getData();
+                selectedImagePath = getPath(selectedImageUri);
+                Log.i("테스트","에러1");
                 try {
-                    //Uri에서 이미지 이름을 얻어온다.
-                    String name_Str = getImageNameToUri(data.getData());
-                    img = name_Str;
-                    //이미지 데이터를 비트맵으로 받아온다.
-                    Bitmap image_bitmap 	= MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
-                    ImageView image = (ImageView)findViewById(R.id.imageView);
+                    imageView.setImageURI(data.getData());
+                    FileInputStream fis = new FileInputStream(selectedImagePath);
 
-                    //배치해놓은 ImageView에 set
-                    image.setImageBitmap(image_bitmap);
+                    img = new byte[fis.available()];
 
-                    //Toast.makeText(getBaseContext(), "name_Str : "+name_Str , Toast.LENGTH_SHORT).show();
-                } catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (Exception e)
-                {
+                    fis.read(img);
+                    Log.i("테스트","에러3");
+                }catch (Exception e){
+                    Log.i("테스트",""+selectedImagePath);
                     e.printStackTrace();
                 }
             }
         }
     }
 
-
-
-    public String getImageNameToUri(Uri data) {
-        String[] proj = { MediaStore.Images.Media.DATA };
-        Cursor cursor = managedQuery(data, proj, null, null, null);
-
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-
-        cursor.moveToFirst();
-
-        String imgPath = cursor.getString(column_index);
-        String imgName = imgPath.substring(imgPath.lastIndexOf("/")+1);
-
-        return imgName;
+    public String getPath(Uri uri) {
+        // uri가 null일경우 null반환
+        if( uri == null ) {
+            return null;
+        }
+        // 미디어스토어에서 유저가 선택한 사진의 URI를 받아온다.
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        if( cursor != null ){
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
+        // URI경로를 반환한다.
+        return uri.getPath();
     }
 
 

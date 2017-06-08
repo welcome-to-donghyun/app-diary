@@ -7,6 +7,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,6 +27,7 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
     private ArrayAdapter<String> navi;
     private String[] leftSliderData1={"홈 화면", "로그아웃"};
     private Button editbt, deletebt;
+
     private ImageView imageView;
 
     private Dao dao;
@@ -59,13 +61,16 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
         contentText = (TextView)findViewById(R.id.contentTextView);
         titleText.setText(diary.getDtitle());
         contentText.setText(diary.getDcontent());
+
         imageView = (ImageView)findViewById(R.id.imageView);
+        //imageView.setImageResource(R.drawable.test);
+        //set imgview 함수 사용
+
 
 
         editbt=(Button)findViewById(R.id.editButton);
         deletebt=(Button)findViewById(R.id.deleteButton);
-        imageView = (ImageView)findViewById(R.id.imageView);
-        imageView.setImageResource(R.drawable.test);
+
         editbt.setOnClickListener(this);
         deletebt.setOnClickListener(this);
     }
@@ -121,6 +126,9 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
             case R.id.editButton :
                 intent = new Intent(this, DiaryWriteActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("editdno", dno);
+                intent.putExtra("uno", uno);
+                intent.putExtra("date", diary.getDdate());
                 startActivity(intent);
                 break;
             case R.id.deleteButton :
