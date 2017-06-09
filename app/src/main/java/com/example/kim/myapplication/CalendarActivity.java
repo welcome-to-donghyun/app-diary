@@ -2,6 +2,8 @@ package com.example.kim.myapplication;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,6 +23,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.kim.myapplication.decorator.EventDecorator;
+import com.example.kim.myapplication.decorator.MySelectorDecorator;
+import com.example.kim.myapplication.decorator.OneDayDecorator;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
@@ -30,17 +35,24 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import static com.example.kim.myapplication.R.id.calendarView;
 
 public class CalendarActivity extends AppCompatActivity implements OnDateSelectedListener, View.OnClickListener, AdapterView.OnItemClickListener{
+    private final OneDayDecorator oneDayDecorator = new OneDayDecorator();
+
+    private String[] leftSliderData1={"홈 화면", "로그아웃"};
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
     private ListView leftDrawerList, memoList;
     private ArrayAdapter<String> navi,memo;
-    private String[] leftSliderData1={"홈 화면", "로그아웃"};
+    private ArrayList<DtoDiary> diarydata;
+    private int diarylength;
+    private String [] diaryListData;
+    private DtoDiary diary;
 
     private ArrayList<DtoMemo> memodata;
     private Button writebutton;
@@ -48,6 +60,7 @@ public class CalendarActivity extends AppCompatActivity implements OnDateSelecte
     private int uno;
     private TextView textView;
     private Dao dao;
+    private String ddate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +74,6 @@ public class CalendarActivity extends AppCompatActivity implements OnDateSelecte
         }
         initDrawer();
 
-        //calendarFunction();
-
         dao = new Dao(getApplicationContext());
 
         uno = getIntent().getExtras().getInt("uno");
@@ -75,7 +86,16 @@ public class CalendarActivity extends AppCompatActivity implements OnDateSelecte
         String [] memoListData = new String[length];
         for(int i=0;i<memodata.size();i++)
             memoListData[i] = memodata.get(i).getMtitle();
-
+        //달력 표시를 위한 사전 준비 코드
+        diarydata = dao.getDiary(uno);
+        diarylength = diarydata.size();
+        diaryListData = new String[diarylength];
+        for(int i=0;i<diarydata.size();i++) {
+            diaryListData[i] = diarydata.get(i).getDdate();
+        }
+        diary=null;
+        // 달력 생성
+        calendarFunction();
 
         writebutton = (Button)findViewById(R.id.memobutton);
         writebutton.setOnClickListener(this);
@@ -165,30 +185,32 @@ public class CalendarActivity extends AppCompatActivity implements OnDateSelecte
         intent.putExtra("uno", uno);
         intent.putExtra("mno", memodata.get(position).getMno());
         startActivity(intent);
-
-/*        switch(position){
-            case 0 :
-                intent = new Intent(this, MemoViewActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                break;
-            case 1 :
-                intent = new Intent(this, DiaryViewActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                break;
-        }*/
     }
 
-    /*public  void calendarFunction(){
-        ArrayList<DtoDiary> diary = dao.getDiary(uno);
+    public  void calendarFunction(){
 
         calendar = (MaterialCalendarView) findViewById(R.id.calendarView);
         calendar.setOnDateChangedListener(this);
-        calendar.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
+        calendar.setLeftArrowMask(getResources().getDrawable(R.drawable.ic_navigation_arrow_back));
+        calendar.setRightArrowMask(getResources().getDrawable(R.drawable.ic_navigation_arrow_forward));
 
+        Calendar instance = Calendar.getInstance();
+        calendar.setSelectedDate(instance.getTime());
+        Calendar instance1 = Calendar.getInstance();
+        instance1.set(instance1.get(Calendar.YEAR), Calendar.JANUARY, 1);
+        Calendar instance2 = Calendar.getInstance();
+        instance2.set(instance2.get(Calendar.YEAR), Calendar.DECEMBER, 31);
+        calendar.state().edit()
+                .setMinimumDate(instance1.getTime())
+                .setMaximumDate(instance2.getTime())
+                .commit();
 
-    }*/
+        calendar.addDecorators(
+                new MySelectorDecorator(this),
+                oneDayDecorator
+        );
+        new ApiSimulator().executeOnExecutor(Executors.newSingleThreadExecutor());
+    }
 
     //메모 리스트 뷰의 높이 지정
     public static void setListViewHeightBasedOnChildren(ListView listView) {
@@ -215,9 +237,85 @@ public class CalendarActivity extends AppCompatActivity implements OnDateSelecte
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-        Intent intent = new Intent(getApplicationContext(), DiaryWriteActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra("uno", uno);
-        startActivity(intent);
+        oneDayDecorator.setDate(date.getDate());
+        widget.invalidateDecorators();
+
+        if(date.getMonth()>9) {
+            if(date.getDay()>9)
+                ddate = "" + date.getYear() + "" + (date.getMonth()+1) + "" + date.getDay();
+            else
+                ddate = "" + date.getYear() + "" + (date.getMonth()+1) + "0" + date.getDay();
+        }
+        else {
+            if(date.getDay()>9)
+                ddate = "" + date.getYear() + "0" + (date.getMonth()+1) + "" + date.getDay();
+            else
+                ddate = "" + date.getYear() + "0" + (date.getMonth()+1) + "0" + date.getDay();
+        }
+        Toast.makeText(getApplicationContext(),  date.getYear() +"년 "+ (date.getMonth()+1)+"월 "+ date.getDay()+"일 다이어리", Toast.LENGTH_LONG).show();
+
+        if(checkDiary()){       //다이어리가 있을 때
+            Intent intent = new Intent(getApplicationContext(), DiaryViewActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("uno", uno);
+            intent.putExtra("dno", diary.getDno());
+            startActivity(intent);
+        }
+        else{   //다이어리가 없을 때
+            Intent intent = new Intent(getApplicationContext(), DiaryWriteActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("uno", uno);
+            intent.putExtra("editdno", -1);
+            intent.putExtra("date", ""+ddate);
+            startActivity(intent);
+        }
+    }
+
+    private boolean checkDiary(){
+        diary = dao.getDiaryddate(uno,ddate);
+        if(diary!=null)
+            return true;
+        else
+            return false;
+    }
+
+    private class ApiSimulator extends AsyncTask<Void, Void, List<CalendarDay>> {
+        @Override
+        protected List<CalendarDay> doInBackground(@NonNull Void... voids) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            int year,month,date;
+
+            Calendar calendar = Calendar.getInstance();
+            ArrayList<CalendarDay> dates = new ArrayList<>();
+
+            for (int i = 0; i < diaryListData.length; i++) {
+                calendar.set(Integer.parseInt(diaryListData[i].substring(0, 4)), Integer.parseInt(diaryListData[i].substring(4, 6)) - 1, Integer.parseInt(diaryListData[i].substring(6, 8)));
+            }
+            for (int i = 0; i < diaryListData.length; i++) {
+                year = Integer.parseInt(diaryListData[i].substring(0, 4));
+                month = Integer.parseInt(diaryListData[i].substring(4, 6)) - 1;
+                date = Integer.parseInt(diaryListData[i].substring(6, 8)) ;
+                calendar.set(year,month,date);
+                CalendarDay day = CalendarDay.from(calendar);
+                dates.add(day);
+            }
+
+            return dates;
+        }
+
+        @Override
+        protected void onPostExecute(@NonNull List<CalendarDay> calendarDays) {
+            super.onPostExecute(calendarDays);
+
+            if (isFinishing()) {
+                return;
+            }
+
+            calendar.addDecorator(new EventDecorator(Color.RED, calendarDays));
+        }
     }
 }

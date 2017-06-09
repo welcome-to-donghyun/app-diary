@@ -46,11 +46,13 @@
                     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
                         xmlns:app="http://schemas.android.com/apk/res-auto"
                         android:id="@+id/calendarView"
+                        app:mcv_arrowColor="@color/fbutton_color_emerald"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
-                        app:mcv_showOtherDates="all"
-                        app:mcv_selectionColor="#00F"
+                        app:mcv_showOtherDates="none"
+                        app:mcv_titleAnimationOrientation="horizontal"
+                        app:mcv_selectionColor="#d35400"
                         />
 
                     <info.hoang8f.widget.FButton
@@ -63,7 +65,7 @@
                         android:minWidth="@dimen/demo_button_min_width"
                         android:text="메모 추가"
                         android:textColor="@android:color/white"
-                        fbutton:buttonColor="@color/fbutton_color_wet_asphalt"
+                        fbutton:buttonColor="@color/fbutton_color_emerald"
                         fbutton:shadowEnabled="true" />
 
 

@@ -60,7 +60,7 @@ android:orientation="vertical">
             android:layout_gravity="left"
             android:layout_margin="10dp"
             android:hint="메모 내용"
-            android:inputType="text"
+            android:inputType="none"
             android:id="@+id/contentEditText" />
 
         <info.hoang8f.widget.FButton
