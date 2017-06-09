@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -27,12 +29,23 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class DiaryWriteActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
     private static final int SELECT_PICTURE = 1;
+
+    private static final int PICK_FROM_CAMERA = 0;
+    private static final int PICK_FROM_ALBUM = 1;
+    private static final int CROP_FROM_iMAGE = 2;
+    private Uri mImageCaptureUri;
+    private String absoultePath;
+
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
@@ -79,15 +92,28 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
         writebt = (Button)findViewById(R.id.writeButton);
         ll=(LinearLayout)findViewById(R.id.linearLaoyout);
 
-        if(editdno != -1){
+        imageView.getLayoutParams().width = 0;
+        imageView.getLayoutParams().height = 0;
+
+        if(editdno != -1){      //수정하러 온거다.
             dno = editdno;
             diary = dao.getDiarydno(uno,dno);
             titleet.setText(diary.getDtitle());
             contentet.setText(diary.getDcontent());
             img = diary.getDimg();
-            //img 파일도 추가
+            if(img!=null) {
+                imageView.setImageBitmap(byteArrayToBitmap(diary.getDimg()));
+                imageView.getLayoutParams().width = 600;
+                imageView.getLayoutParams().height = 600;
+            }
+            else{
+                imageView.getLayoutParams().width = 0;
+                imageView.getLayoutParams().height = 0;
+            }
         }
 
+        imageView.setMaxHeight(0);
+        imageView.setMaxWidth(0);
         writebt.setOnClickListener(this);
         filebt.setOnClickListener(this);
         ll.setOnClickListener(this);
@@ -176,53 +202,93 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void fileaddButton(){
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
-
-}
+        doTakeAlbumAction();
+    }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            if (requestCode == SELECT_PICTURE) {
-                Uri selectedImageUri = data.getData();
-                selectedImagePath = getPath(selectedImageUri);
-                Log.i("테스트","에러1");
-                try {
-                    imageView.setImageURI(data.getData());
-                    FileInputStream fis = new FileInputStream(selectedImagePath);
+        if(resultCode != RESULT_OK)
+            return;
 
-                    img = new byte[fis.available()];
+        switch(requestCode)
+        {
+            case PICK_FROM_ALBUM:
+            {
+                // 이후의 처리가 카메라와 같으므로 일단  break없이 진행합니다.
+                // 실제 코드에서는 좀더 합리적인 방법을 선택하시기 바랍니다.
+                mImageCaptureUri = data.getData();
+            }
 
-                    fis.read(img);
-                    Log.i("테스트","에러3");
-                }catch (Exception e){
-                    Log.i("테스트",""+selectedImagePath);
-                    e.printStackTrace();
+            case PICK_FROM_CAMERA:
+            {
+                // 이미지를 가져온 이후의 리사이즈할 이미지 크기를 결정합니다.
+                // 이후에 이미지 크롭 어플리케이션을 호출하게 됩니다.
+                Intent intent = new Intent("com.android.camera.action.CROP");
+                intent.setDataAndType(mImageCaptureUri, "image/*");
+
+                // CROP할 이미지를 200*200 크기로 저장
+                intent.putExtra("outputX", 500); // CROP한 이미지의 x축 크기
+                intent.putExtra("outputY", 500); // CROP한 이미지의 y축 크기
+                intent.putExtra("aspectX", 5); // CROP 박스의 X축 비율
+                intent.putExtra("aspectY", 5); // CROP 박스의 Y축 비율
+                intent.putExtra("scale", true);
+                intent.putExtra("return-data", true);
+                startActivityForResult(intent, CROP_FROM_iMAGE); // CROP_FROM_CAMERA case문 이동
+                break;
+            }
+            case CROP_FROM_iMAGE:
+            {
+                // 크롭이 된 이후의 이미지를 넘겨 받습니다.
+                // 이미지뷰에 이미지를 보여준다거나 부가적인 작업 이후에
+                // 임시 파일을 삭제합니다.
+                if(resultCode != RESULT_OK) {
+                    return;
+                }
+
+                final Bundle extras = data.getExtras();
+
+                // CROP된 이미지를 저장하기 위한 FILE 경로
+                String filePath = Environment.getExternalStorageDirectory().getAbsolutePath()+
+                        "/SmartWheel/"+System.currentTimeMillis()+".jpg";
+
+                if(extras != null)
+                {
+                    Bitmap photo = extras.getParcelable("data"); // CROP된 BITMAP
+                    img = bitmapToByteArray(photo);
+
+                    imageView.getLayoutParams().width = 600;
+                    imageView.getLayoutParams().height = 600;
+                    imageView.setImageBitmap(photo); // 레이아웃의 이미지칸에 CROP된 BITMAP을 보여줌
+
+                }
+                // 임시 파일 삭제
+                File f = new File(mImageCaptureUri.getPath());
+                if(f.exists())
+                {
+                    f.delete();
                 }
             }
         }
+
     }
 
-    public String getPath(Uri uri) {
-        // uri가 null일경우 null반환
-        if( uri == null ) {
-            return null;
-        }
-        // 미디어스토어에서 유저가 선택한 사진의 URI를 받아온다.
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        if( cursor != null ){
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        }
-        // URI경로를 반환한다.
-        return uri.getPath();
+
+    /**
+     * 앨범에서 이미지 가져오기
+     */
+    public void doTakeAlbumAction() // 앨범에서 이미지 가져오기
+    {
+        // 앨범 호출
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType(android.provider.MediaStore.Images.Media.CONTENT_TYPE);
+        startActivityForResult(intent, PICK_FROM_ALBUM);
     }
 
+    public byte[] bitmapToByteArray( Bitmap bitmap ) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream() ;
+        bitmap.compress( Bitmap.CompressFormat.PNG, 100, stream) ;
+        byte[] byteArray = stream.toByteArray() ;
+        return byteArray ;
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -244,5 +310,10 @@ public class DiaryWriteActivity extends AppCompatActivity implements View.OnClic
                 finish();
                 break;
         }
+    }
+
+    public Bitmap byteArrayToBitmap( byte[] $byteArray ) {
+        Bitmap bitmap = BitmapFactory.decodeByteArray( $byteArray, 0, $byteArray.length ) ;
+        return bitmap ;
     }
 }

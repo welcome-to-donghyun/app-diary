@@ -2,6 +2,8 @@ package com.example.kim.myapplication;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DiaryViewActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
 
@@ -29,7 +32,6 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
     private Button editbt, deletebt;
 
     private ImageView imageView;
-
     private Dao dao;
     private int dno, uno;
     private TextView textView;
@@ -63,10 +65,12 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
         contentText.setText(diary.getDcontent());
 
         imageView = (ImageView)findViewById(R.id.imageView);
-        //imageView.setImageResource(R.drawable.test);
-        //set imgview 함수 사용
-
-
+        if(diary.getDimg() != null)
+            imageView.setImageBitmap(byteArrayToBitmap(diary.getDimg()));
+        else{
+            imageView.getLayoutParams().width = 0;
+            imageView.getLayoutParams().height = 0;
+        }
 
         editbt=(Button)findViewById(R.id.editButton);
         deletebt=(Button)findViewById(R.id.deleteButton);
@@ -136,6 +140,7 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
                 dao.deletediary(dno);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("uno", uno);
+                Toast.makeText(getApplicationContext(), "다이어리가 삭제 되었습니다", Toast.LENGTH_LONG).show();
                 startActivity(intent);
                 break;
         }
@@ -162,4 +167,9 @@ public class DiaryViewActivity extends AppCompatActivity implements View.OnClick
                 break;
         }
     }
+    public static Bitmap byteArrayToBitmap( byte[] byteArray ) {
+        return BitmapFactory.decodeByteArray(byteArray, 0,byteArray.length ) ;
+    }
+
+
 }

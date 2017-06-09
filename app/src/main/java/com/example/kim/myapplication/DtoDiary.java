@@ -9,11 +9,11 @@ public class DtoDiary {
     private int uno;
     private String dtitle;
     private String dcontent;
-    private byte [] dimg;
+    private byte[] dimg;
     private String ddate;
 
 
-    public DtoDiary(int dno, int uno, String dtitle, String dcontent, byte [] dimg, String ddate) {
+    public DtoDiary(int dno, int uno, String dtitle, String dcontent, byte[] dimg, String ddate) {
         this.dno = dno;
         this.uno = uno;
         this.dtitle = dtitle;

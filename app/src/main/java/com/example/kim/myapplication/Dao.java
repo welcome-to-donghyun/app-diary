@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 public class Dao {
     private Context context;
     private SQLiteDatabase database;
+    public static final String U_PIC = "picture";
 
     public Dao(Context context) {
         this.context = context;
@@ -222,7 +224,7 @@ public class Dao {
         int dno;
         String dtitle;
         String dcontent;
-        byte [] dimg;
+        byte[] dimg;
         String ddate;
 
         String sql = "SELECT * FROM Diary WHERE uno = "+uno+";";
@@ -280,38 +282,59 @@ public class Dao {
             dimg = cursor.getBlob(4);
             diary = new DtoDiary(dno, uno, dtitle, dcontent, dimg,ddate);
         }
-        Log.i("테스이빈당ㅇㅇ", ddate);
         cursor.close();
         return diary;
     }
 
 
     public void insertdiary(int uno, String title, String content, byte [] img, String date){
-        String sql = "INSERT INTO Diary(uno, dtitle, dcontent,ddate)"
-                + " VALUES(" + uno + ", '" + title + "', '" + content + "', '"+date+"');";
-        try {
-            database.execSQL(sql);
-            if(img!=null) {
-                ContentValues values = new ContentValues();
-                values.put("dimg", img);
-                database.insert("Diary", null, values);
+        String sql;
+        if(img==null) {
+             sql = "INSERT INTO Diary(uno, dtitle, dcontent,ddate)"
+                    + " VALUES(" + uno + ", '" + title + "', '" + content + "', '" + date + "');";
+
+            try {
+                database.execSQL(sql);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+        else{
+            sql  =   "INSERT INTO Diary(uno, dtitle, dcontent, dimg, ddate) VALUES(?,?,?,?,?)";
+            SQLiteStatement insertStmt      =   database.compileStatement(sql);
+            insertStmt.clearBindings();
+            insertStmt.bindString(1, Integer.toString(uno));
+            insertStmt.bindString(2,title);
+            insertStmt.bindString(3, content);
+            insertStmt.bindBlob(4, img);
+            insertStmt.bindString(5, date);
+            insertStmt.executeInsert();
+        }
+
     }
 
     public void updatediary(int dno, String title, String content, byte [] img){
-        String sql = "UPDATE Diary SET dtitle = '"+ title+"', dcontent='"+content+"', dimg='"+img
-                +" WHERE dno="+dno+";";
-        try {
-            database.execSQL(sql);
-            ContentValues values = new ContentValues();
-            values.put("dimg",img);
-            database.update("Diary",values," dno=?",new String[]{""+dno});
-        } catch (Exception e) {
-            e.printStackTrace();
+        String sql;
+        if(img==null) {
+            sql = "UPDATE Diary SET dtitle = '"+ title+"', dcontent='"+content+"', dimg='"+img+"' WHERE dno="+dno+";";
+
+            try {
+                database.execSQL(sql);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        else{
+            sql  =   "UPDATE Diary SET dtitle=?, dcontent=?, dimg=? WHERE dno=?";
+            SQLiteStatement insertStmt      =   database.compileStatement(sql);
+            insertStmt.clearBindings();
+            insertStmt.bindString(1, title);
+            insertStmt.bindString(2,content);
+            insertStmt.bindBlob(3, img);
+            insertStmt.bindString(4,  Integer.toString(dno));
+            insertStmt.executeUpdateDelete();
+        }
+
     }
 
     public void deletediary(int dno){

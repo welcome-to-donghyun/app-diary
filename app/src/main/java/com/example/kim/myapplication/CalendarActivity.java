@@ -92,7 +92,6 @@ public class CalendarActivity extends AppCompatActivity implements OnDateSelecte
         diaryListData = new String[diarylength];
         for(int i=0;i<diarydata.size();i++) {
             diaryListData[i] = diarydata.get(i).getDdate();
-            Log.i("달력표시를 위한 사전 준비 코드 : " , diaryListData[i]);
         }
         diary=null;
         // 달력 생성
@@ -253,7 +252,7 @@ public class CalendarActivity extends AppCompatActivity implements OnDateSelecte
             else
                 ddate = "" + date.getYear() + "0" + (date.getMonth()+1) + "0" + date.getDay();
         }
-        Toast.makeText(getApplicationContext(),  ddate, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(),  date.getYear() +"년 "+ (date.getMonth()+1)+"월 "+ date.getDay()+"일 다이어리", Toast.LENGTH_LONG).show();
 
         if(checkDiary()){       //다이어리가 있을 때
             Intent intent = new Intent(getApplicationContext(), DiaryViewActivity.class);
@@ -284,7 +283,7 @@ public class CalendarActivity extends AppCompatActivity implements OnDateSelecte
         @Override
         protected List<CalendarDay> doInBackground(@NonNull Void... voids) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

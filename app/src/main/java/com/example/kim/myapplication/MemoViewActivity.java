@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MemoViewActivity extends ActionBarActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
     private Toolbar toolbar;
@@ -126,6 +127,7 @@ public class MemoViewActivity extends ActionBarActivity implements View.OnClickL
                 dao.deletememo(mno);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra("uno", uno);
+                Toast.makeText(getApplicationContext(), "메모가 삭제 되었습니다", Toast.LENGTH_LONG).show();
                 startActivity(intent);
                 break;
         }
